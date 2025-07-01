@@ -14,12 +14,12 @@ namespace ComponentInstaller;
 use Composer\Installer\LibraryInstaller;
 use Composer\Script\Event;
 use Composer\Package\PackageInterface;
-use Composer\Package\AliasPackage;
+use Composer\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Component Installer for Composer.
  */
-class Installer extends LibraryInstaller
+class Installer extends LibraryInstaller implements EventSubscriberInterface
 {
     private static $defaultProcesses = array(
         // Copy the assets to the Components directory.
@@ -38,6 +38,18 @@ class Installer extends LibraryInstaller
     protected $componentDir;
 
     /**
+     * Returns an array of event names this subscriber wants to listen to.
+     *
+     * @return array The event names to listen to
+     */
+    public static function getSubscribedEvents()
+    {
+        return [
+            'post-autoload-dump' => 'postAutoloadDump',
+        ];
+    }
+
+    /**
      * {@inheritDoc}
      *
      * Components are supported by all packages. This checks wheteher or not the
@@ -46,26 +58,8 @@ class Installer extends LibraryInstaller
      */
     public function supports($packageType)
     {
-        // Components are supported by all package types. We will just act on
-        // the root package's scripts if available.
-        $rootPackage = isset($this->composer) ? $this->composer->getPackage() : null;
-        if (isset($rootPackage)) {
-            // Ensure we get the root package rather than its alias.
-            while ($rootPackage instanceof AliasPackage) {
-                $rootPackage = $rootPackage->getAliasOf();
-            }
-
-            // Make sure the root package can override the available scripts.
-            if (method_exists($rootPackage, 'setScripts')) {
-                $scripts = $rootPackage->getScripts();
-                // Act on the "post-autoload-dump" command so that we can act on all
-                // the installed packages.
-                $scripts['post-autoload-dump']['component-installer'] = 'ComponentInstaller\\Installer::postAutoloadDump';
-                $rootPackage->setScripts($scripts);
-            }
-        }
-
-        // State support for "component" package types.
+        // Script injection logic moved to getSubscribedEvents().
+        // supports() should only declare supported package types.
         return $packageType == 'component';
     }
 
@@ -175,9 +169,9 @@ class Installer extends LibraryInstaller
         $io->write('<info>Compiling component files</info>');
 
         // Set up all the processes.
-        $processes = $config->has('component-processes') ? 
-                $config->get('component-processes') :
-                static::$defaultProcesses;
+        $processes = $config->has('component-processes') ?
+            $config->get('component-processes') :
+            static::$defaultProcesses;
 
         // Initialize and execute each process in sequence.
         foreach ($processes as $process) {
@@ -195,7 +189,7 @@ class Installer extends LibraryInstaller
                 $io->write("<warning>Process class '$class' not found, skipping this process</warning>");
                 continue;
             }
-            
+
             /** @var \ComponentInstaller\Process\Process $process */
             $process = new $class($composer, $io, $options);
             // When an error occurs during initialization, end the process.

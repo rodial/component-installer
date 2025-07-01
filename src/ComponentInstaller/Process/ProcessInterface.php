@@ -23,8 +23,10 @@ interface ProcessInterface
      *   The Composer object to act on.
      * @param IOInterface $io
      *   Input/Output object to act on.
+     * @param array $options
+     *   Any user provided options to configure this process.
      */
-    public function __construct(Composer $composer, IOInterface $io);
+    public function __construct(Composer $composer, IOInterface $io, array $options = []);
 
     /**
      * Initialize the process before its run.

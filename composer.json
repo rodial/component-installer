@@ -1,5 +1,5 @@
 {
-    "name": "robloach/component-installer",
+    "name": "rodial/component-installer",
     "description": "Allows installation of Components via Composer.",
     "type": "composer-plugin",
     "license": "MIT",
@@ -10,8 +10,8 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "ComponentInstaller": "src/"
+        "psr-4": {
+            "ComponentInstaller\\": "src/ComponentInstaller/"
         }
     },
     "extra": {
@@ -21,13 +21,13 @@
         "class": "ComponentInstaller\\ComponentInstallerPlugin"
     },
     "require": {
-        "php": ">=5.3.2",
-        "kriswallsmith/assetic": "1.*",
-        "composer-plugin-api": "^1.0"
+        "php": "^7.3 || ^8.0",
+        "assetic/framework": "*",
+        "composer-plugin-api": "^2.0"
     },
     "require-dev": {
-        "composer/composer": "~1.1.2",
-        "phpunit/phpunit": "~5.4.6"
+        "composer/composer": "^2.0",
+        "phpunit/phpunit": "^9.5.8"
     },
     "scripts": {
         "test": "phpunit"
@@ -41,5 +41,7 @@
             ".editorconfig"
         ]
     },
-    "abandoned": "oomphinc/composer-installers-extender"
+    "replace": {
+        "robloach/component-installer": "*"
+    }
 }

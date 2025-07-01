@@ -17,6 +17,7 @@ use Composer\IO\NullIO;
 use Composer\Package\Dumper\ArrayDumper;
 use ComponentInstaller\Util\Filesystem;
 use Composer\Package\Loader\ArrayLoader;
+use Composer\Package\Version\VersionParser;
 
 /**
  * The base Process type.
@@ -70,16 +71,13 @@ class Process implements ProcessInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(Composer $composer = null, IOInterface $io = null)
+    public function __construct(Composer $composer = null, IOInterface $io = null, array $options = [])
     {
         $this->composer = isset($composer) ? $composer : new Composer();
         $this->io = isset($io) ? $io : new NullIO();
         $this->fs = new Filesystem();
         $this->installationManager = $this->composer->getInstallationManager();
-        
-        // TODO: Break compatibility and expect in interface
-        $args = func_get_args();
-        $this->options = count($args) > 2 && is_array($args[2]) ? $args[2]: array();
+        $this->options = $options;
     }
 
     /**
@@ -119,7 +117,8 @@ class Process implements ProcessInterface
         foreach ($allPackages as $package) {
             $name = $package['name'];
             if (isset($customComponents[$name]) && is_array($customComponents[$name])) {
-                $package['extra'] = array('component' => $customComponents[$name]);
+                // Use array_replace_recursive to merge extras so we don't overwrite them completely
+                $package['extra'] = array_replace_recursive(isset($package['extra']) ? $package['extra'] : [], array('component' => $customComponents[$name]));
                 $this->packages[] = $package;
             }
             else {
@@ -136,6 +135,10 @@ class Process implements ProcessInterface
             $dumper = new ArrayDumper();
             $package = $dumper->dump($root);
             $package['is-root'] = true;
+            // Let's make sure that the root package extras are also merged correctly
+            if (isset($rootExtras['component']) && is_array($rootExtras['component'])) {
+                $package['extra'] = array_replace_recursive(isset($package['extra']) ? $package['extra'] : [], array('component' => $rootExtras['component']));
+            }
             $this->packages[] = $package;
         }
 
@@ -216,6 +219,7 @@ class Process implements ProcessInterface
                 for ($temp = __DIR__; strlen($temp) > 3; $temp = dirname($temp)) {
                     if (file_exists($temp.DIRECTORY_SEPARATOR.'composer.json')) {
                         $path = $temp;
+                        break;
                     }
                 }
             }
@@ -226,7 +230,7 @@ class Process implements ProcessInterface
         if (!isset($package['version'])) {
             $package['version'] = '1.0.0';
         }
-        $loader = new ArrayLoader();
+        $loader = new ArrayLoader(new VersionParser()); // For Composer 2
         $completePackage = $loader->load($package);
 
         return $this->installationManager->getInstallPath($completePackage);

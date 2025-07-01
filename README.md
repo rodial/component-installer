@@ -1,10 +1,4 @@
-# DEPRECATED
-
-Component Installer has been deprecated. Use one of the following projects instead:
-- [Composer Installers Extender](https://github.com/oomphinc/composer-installers-extender)
-- [Asset Packagist](https://asset-packagist.org)
-- [Composer Asset Plugin](https://github.com/fxpio/composer-asset-plugin)
-- [Laravel Mix](https://laravel.com/docs/5.8/mix) (Example: [eventum/eventum#801](https://github.com/eventum/eventum/pull/801) and  [eventum/eventum#812](https://github.com/eventum/eventum/pull/812))
+Replace robloach/component-installer for Composer 2
 
 ## Example
 
@@ -28,13 +22,13 @@ Allows installation of Components via [Composer](http://getcomposer.org).
 ## Install
 
 ```
-composer require robloach/component-installer
+composer require rodial/component-installer
 ```
 
 ``` json
 {
     "require": {
-        "robloach/component-installer": "*"
+        "rodial/component-installer": "*"
     }
 }
 ```
@@ -55,7 +49,7 @@ composer require components/normalize.css
     "require": {
         "components/jquery": "2.*",
         "components/normalize.css": "3.*",
-        "robloach/component-installer": "*"
+        "rodial/component-installer": "*"
     }
 }
 ```
@@ -161,7 +155,7 @@ Defaults to `components`.
 ## Creating a Component
 
 To set up a Component to be installed with Component Installer, have it
-`require` the package *robloach/component-installer* and set the `type` to
+`require` the package *rodial/component-installer* and set the `type` to
 *component*, but it is not necessary:
 
 ``` json
@@ -169,7 +163,7 @@ To set up a Component to be installed with Component Installer, have it
     "name": "components/bootstrap",
     "type": "component",
     "require": {
-        "robloach/component-installer": "*"
+        "rodial/component-installer": "*"
     },
     "extra": {
         "component": {
@@ -288,7 +282,7 @@ define use of [html5shiv](https://github.com/aFarkas/html5shiv):
                     }
                 },
                 "require": {
-                    "robloach/component-installer": "*"
+                    "rodial/component-installer": "*"
                 }
             }
         }
